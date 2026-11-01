@@ -74,7 +74,7 @@ function architectureHTML() {
         <div class="cm-tier-label">中央银行</div>
         <div class="cm-nodes">${mapNode(byCode.PBOC)}</div>
       </div>
-      <div class="cm-connector"><span>大额支付系统 CNAPS · 准备金账户清算</span></div>
+      <div class="cm-connector"><span>大额支付系统 CNAPS · 准备金 / 特参账户清算</span></div>
       <div class="cm-tier">
         <div class="cm-tier-label">清算机构</div>
         <div class="cm-nodes">
@@ -491,7 +491,7 @@ async function paint(root) {
       <div class="card-head">
         <div>
           <h2>跨机构清算架构</h2>
-          <p class="sub">商业银行 → 清算机构（网联特参账户 / 银联 / CIPS）→ 人民银行 CNAPS → 收款行 / 支付机构</p>
+          <p class="sub">商业银行 → 清算机构（网联 / 银联 / CIPS）→ 网联特参账户 / 央行准备金账户 → 收款行 / 支付机构</p>
         </div>
         <span class="chip">${cache.institutions.length} 家参与机构</span>
       </div>
