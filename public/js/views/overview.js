@@ -630,7 +630,7 @@ export default {
         <div class="grid-3 mt-16">
           <div class="mini-item"><span class="idx">1</span><div><strong>断直连：</strong>第三方支付机构不再直连银行，统一经网联 / 银联转接，交易与资金流向可被完整监测。</div></div>
           <div class="mini-item"><span class="idx">2</span><div><strong>备付金集中存管：</strong>客户备付金 100% 缴存人民银行，支付机构不得挪用，从制度上隔离客户资金与自有资金。</div></div>
-          <div class="mini-item"><span class="idx">3</span><div><strong>两级清算：</strong>清算机构负责转接与轧差，央行 CNAPS 在准备金账户完成最终清算，银行与支付机构再完成客户入账。</div></div>
+          <div class="mini-item"><span class="idx">3</span><div><strong>两级清算：</strong>清算机构负责转接与轧差，网联通过其央行特参账户完成备付金划拨，央行 CNAPS 在准备金账户完成最终清算，银行与支付机构再完成客户入账。</div></div>
         </div>
         <div class="pano-hint">示意图用于教学：点击高亮的机构节点可查看实时科目余额；实际体系还包括收单外包服务机构、支付信息服务机构等。</div>
       </div>

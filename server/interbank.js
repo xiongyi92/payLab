@@ -52,7 +52,7 @@ const INSTITUTIONS = {
     role: '第三方支付网络清算',
     color: '#22d3ee',
     chart: {
-      RESERVE_PBOC: { name: '清算备付金（央行）', type: 'ASSET', desc: '网联在人民银行清算账户中的资金' },
+      RESERVE_PBOC: { name: '特参账户存款（央行）', type: 'ASSET', desc: '网联作为特许参与者在人民银行开立的清算账户资金' },
       RECEIVABLE: { name: '清算应收款', type: 'ASSET', desc: '应向参与机构收取的清算款' },
       PAYABLE: { name: '清算应付款', type: 'LIABILITY', desc: '应向参与机构支付的清算款' },
       FEE_INCOME: { name: '清算服务费收入', type: 'INCOME', desc: '向支付机构收取的网络清算服务费' }
@@ -99,7 +99,7 @@ const INSTITUTIONS = {
       RESERVE_CCB: { name: '准备金存款 · 建设银行', type: 'LIABILITY', desc: '建设银行在央行的准备金存款' },
       RESERVE_ABC: { name: '准备金存款 · 农业银行', type: 'LIABILITY', desc: '农业银行在央行的准备金存款' },
       RESERVE_PAYLAB: { name: '备付金存款 · 支付机构', type: 'LIABILITY', desc: '支付机构集中存管的客户备付金' },
-      RESERVE_NETSUNION: { name: '清算备付金 · 网联', type: 'LIABILITY', desc: '网联在央行的清算备付金' },
+      RESERVE_NETSUNION: { name: '网联特参账户', type: 'LIABILITY', desc: '网联作为特许参与者在央行开立的清算账户余额' },
       RESERVE_UNIONPAY: { name: '清算备付金 · 银联', type: 'LIABILITY', desc: '银联在央行的清算备付金' },
       RESERVE_CIPS: { name: '清算备付金 · CIPS', type: 'LIABILITY', desc: 'CIPS 在央行的清算备付金' }
     }
@@ -154,12 +154,12 @@ const SCENARIOS = [
     name: '商品支付 · 网联',
     short: '商品支付',
     network: '网联清算',
-    desc: '用户银行卡扣款，经网联清算把备付金划入支付机构，再结算给商户开户行。',
+    desc: '用户银行卡扣款，经网联轧差后通过网联特参账户划入支付机构备付金，再结算给商户开户行。',
     defaultAmount: 128,
     payer: 'U10001',
     payee: '云栖优选商城',
-    legs: 5,
-    teaching: '第三方支付的核心是备付金：用户资金先进入支付机构在央行的备付金账户，再按净额结算给商户。'
+    legs: 6,
+    teaching: '第三方支付的核心是备付金：发卡行资金先进入网联在央行的特参账户，再由网联划入支付机构备付金账户，最后按净额结算给商户。'
   },
   {
     code: 'card',
@@ -178,11 +178,11 @@ const SCENARIOS = [
     name: '生活缴费 · 水电费',
     short: '水电费代收',
     network: '网联清算',
-    desc: '支付机构代收水电费，资金经网联和央行清算后划转至公用事业单位开户行。',
+    desc: '支付机构代收水电费，资金经网联特参账户和央行清算后划转至公用事业单位开户行。',
     defaultAmount: 200,
     payer: 'U10001',
     payee: '市自来水公司',
-    legs: 5,
+    legs: 6,
     teaching: '代收付属于中间业务：支付机构先记“代收代付款项”，再划转给公用事业单位，不能把代收资金当作自有资金。'
   },
   {
@@ -190,11 +190,11 @@ const SCENARIOS = [
     name: '钱包充值',
     short: '钱包充值',
     network: '网联清算',
-    desc: '用户从银行卡向支付机构钱包充值，备付金增加，同时确认对用户的钱包余额负债。',
+    desc: '用户从银行卡向支付机构钱包充值，资金经网联特参账户划入备付金，同时确认对用户的钱包余额负债。',
     defaultAmount: 500,
     payer: 'U10001',
     payee: '本人钱包',
-    legs: 4,
+    legs: 5,
     teaching: '充值不是收入：支付机构资产（备付金）与负债（钱包余额）同时增加，客户备付金必须 100% 集中存管。'
   },
   {
@@ -202,11 +202,11 @@ const SCENARIOS = [
     name: '钱包提现',
     short: '钱包提现',
     network: '网联清算',
-    desc: '用户把钱包余额提现到银行卡，支付机构扣减钱包负债并经网联、央行清算划付。',
+    desc: '用户把钱包余额提现到银行卡，支付机构经网联特参账户和央行清算划付。',
     defaultAmount: 300,
     payer: '本人钱包',
     payee: 'U10001',
-    legs: 4,
+    legs: 5,
     teaching: '提现是充值、消费的逆向流程：钱包负债减少，备付金减少，平台仅确认提现手续费收入。'
   },
   {
@@ -376,28 +376,40 @@ function buildGoodsFlow(options) {
       ]
     }),
     makeLeg(2, {
-      key: 'pboc-settlement',
-      title: '央行大额支付系统清算',
-      detail: '各参与机构在人民银行的准备金 / 备付金账户同步借记贷记，完成跨行最终清算。',
-      system: '人民银行 CNAPS',
-      from: 'PBOC',
-      to: 'ICBC',
+      key: 'netsunion-sp-receive',
+      title: '网联特参账户收款',
+      detail: `${INSTITUTIONS.ICBC.name}的净额经人民银行 ACS 记入网联特许参与者账户，完成跨行资金归集。`,
+      system: '人民银行 ACS · 网联特参账户',
+      from: 'ICBC',
+      to: 'NETSUNION',
       amount: A,
       entries: [
         line('ICBC', 'INTERBANK_PAYABLE', A, 0, '结清网联待清算'),
         line('ICBC', 'RESERVE_PBOC', 0, A, '准备金减少'),
-        line('NETSUNION', 'RESERVE_PBOC', A, 0, '收到发卡行清算款'),
+        line('NETSUNION', 'RESERVE_PBOC', A, 0, '特参账户收到清算款'),
         line('NETSUNION', 'RECEIVABLE', 0, A, '结清对工行应收'),
-        line('NETSUNION', 'PAYABLE', A - networkFee, 0, '结清对支付机构应付'),
-        line('NETSUNION', 'RESERVE_PBOC', 0, A - networkFee, '向支付机构划付'),
-        line('PAYLAB', 'RESERVE_PBOC', A - networkFee, 0, '备付金账户收款'),
-        line('PAYLAB', 'INTERBANK_RECEIVABLE', 0, A - networkFee, '网联待清算'),
         line('PBOC', 'RESERVE_ICBC', A, 0, '工商银行准备金减少'),
-        line('PBOC', 'RESERVE_PAYLAB', 0, A - networkFee, '支付机构备付金增加'),
-        line('PBOC', 'RESERVE_NETSUNION', 0, networkFee, '网联备付金增加')
+        line('PBOC', 'RESERVE_NETSUNION', 0, A, '网联特参账户增加')
       ]
     }),
     makeLeg(3, {
+      key: 'netsunion-sp-payout',
+      title: '特参账户向支付机构划付',
+      detail: `网联从特参账户向支付机构备付金账户划付净额，网络清算费 ¥${(networkFee / 100).toFixed(2)} 留存于特参账户。`,
+      system: '人民银行 ACS · 网联特参账户',
+      from: 'NETSUNION',
+      to: 'PAYLAB',
+      amount: A - networkFee,
+      entries: [
+        line('NETSUNION', 'PAYABLE', A - networkFee, 0, '结清对支付机构应付'),
+        line('NETSUNION', 'RESERVE_PBOC', 0, A - networkFee, '特参账户向支付机构划付'),
+        line('PAYLAB', 'RESERVE_PBOC', A - networkFee, 0, '备付金账户收款'),
+        line('PAYLAB', 'INTERBANK_RECEIVABLE', 0, A - networkFee, '网联待清算'),
+        line('PBOC', 'RESERVE_NETSUNION', A - networkFee, 0, '网联特参账户减少'),
+        line('PBOC', 'RESERVE_PAYLAB', 0, A - networkFee, '支付机构备付金增加')
+      ]
+    }),
+    makeLeg(4, {
       key: 'paylab-posting',
       title: '支付机构备付金入账',
       detail: '支付机构收到清算资金，同时确认商户待结算款与支付服务费收入。',
@@ -411,7 +423,7 @@ function buildGoodsFlow(options) {
         line('PAYLAB', 'FEE_INCOME', 0, platformFee, '支付服务费收入')
       ]
     }),
-    makeLeg(4, {
+    makeLeg(5, {
       key: 'merchant-settlement',
       title: '商户结算出款',
       detail: `支付机构把商户净额 ¥${(payeeNet / 100).toFixed(2)} 结算至商户开户行，备付金相应减少。`,
@@ -555,28 +567,40 @@ function buildUtilityFlow(options) {
       ]
     }),
     makeLeg(2, {
-      key: 'pboc-settlement',
-      title: '央行大额支付清算',
-      detail: '付款行备付金减少，支付机构备付金增加，网联确认服务费收入。',
-      system: '人民银行 CNAPS',
-      from: 'PBOC',
-      to: 'ICBC',
+      key: 'netsunion-sp-receive',
+      title: '网联特参账户收款',
+      detail: `${INSTITUTIONS.ICBC.name}的净额经人民银行 ACS 记入网联特许参与者账户。`,
+      system: '人民银行 ACS · 网联特参账户',
+      from: 'ICBC',
+      to: 'NETSUNION',
       amount: A,
       entries: [
         line('ICBC', 'INTERBANK_PAYABLE', A, 0, '结清网联待清算'),
         line('ICBC', 'RESERVE_PBOC', 0, A, '准备金减少'),
-        line('NETSUNION', 'RESERVE_PBOC', A, 0, '收到付款行清算款'),
+        line('NETSUNION', 'RESERVE_PBOC', A, 0, '特参账户收到清算款'),
         line('NETSUNION', 'RECEIVABLE', 0, A, '结清对工行应收'),
-        line('NETSUNION', 'PAYABLE', A - networkFee, 0, '结清对支付机构应付'),
-        line('NETSUNION', 'RESERVE_PBOC', 0, A - networkFee, '向支付机构划付'),
-        line('PAYLAB', 'RESERVE_PBOC', A - networkFee, 0, '备付金账户收款'),
-        line('PAYLAB', 'INTERBANK_RECEIVABLE', 0, A - networkFee, '网联待清算'),
         line('PBOC', 'RESERVE_ICBC', A, 0, '工商银行准备金减少'),
-        line('PBOC', 'RESERVE_PAYLAB', 0, A - networkFee, '支付机构备付金增加'),
-        line('PBOC', 'RESERVE_NETSUNION', 0, networkFee, '网联备付金增加')
+        line('PBOC', 'RESERVE_NETSUNION', 0, A, '网联特参账户增加')
       ]
     }),
     makeLeg(3, {
+      key: 'netsunion-sp-payout',
+      title: '特参账户向支付机构划付',
+      detail: `网联从特参账户向支付机构备付金账户划付净额，网络清算费 ¥${(networkFee / 100).toFixed(2)} 留存于特参账户。`,
+      system: '人民银行 ACS · 网联特参账户',
+      from: 'NETSUNION',
+      to: 'PAYLAB',
+      amount: A - networkFee,
+      entries: [
+        line('NETSUNION', 'PAYABLE', A - networkFee, 0, '结清对支付机构应付'),
+        line('NETSUNION', 'RESERVE_PBOC', 0, A - networkFee, '特参账户向支付机构划付'),
+        line('PAYLAB', 'RESERVE_PBOC', A - networkFee, 0, '备付金账户收款'),
+        line('PAYLAB', 'INTERBANK_RECEIVABLE', 0, A - networkFee, '网联待清算'),
+        line('PBOC', 'RESERVE_NETSUNION', A - networkFee, 0, '网联特参账户减少'),
+        line('PBOC', 'RESERVE_PAYLAB', 0, A - networkFee, '支付机构备付金增加')
+      ]
+    }),
+    makeLeg(4, {
       key: 'agency-posting',
       title: '支付机构确认代收款项',
       detail: '支付机构把代收资金记为负债“代收代付款项”，并确认代理服务费收入。',
@@ -590,7 +614,7 @@ function buildUtilityFlow(options) {
         line('PAYLAB', 'FEE_INCOME', 0, platformFee, '代理服务费收入')
       ]
     }),
-    makeLeg(4, {
+    makeLeg(5, {
       key: 'utility-remit',
       title: '代收资金划转公用事业单位',
       detail: `支付机构把 ¥${(payeeNet / 100).toFixed(2)} 划转至公用事业单位开户行，代收负债清零。`,
@@ -652,27 +676,40 @@ function buildTopupFlow(options) {
       ]
     }),
     makeLeg(2, {
-      key: 'pboc-settlement',
-      title: '央行大额支付清算',
-      detail: '发卡行准备金减少，支付机构备付金增加，完成资金划付。',
-      system: '人民银行 CNAPS',
-      from: 'PBOC',
-      to: 'ICBC',
+      key: 'netsunion-sp-receive',
+      title: '网联特参账户收款',
+      detail: `${INSTITUTIONS.ICBC.name}的扣款净额经人民银行 ACS 记入网联特许参与者账户。`,
+      system: '人民银行 ACS · 网联特参账户',
+      from: 'ICBC',
+      to: 'NETSUNION',
       amount: A,
       entries: [
         line('ICBC', 'INTERBANK_PAYABLE', A, 0, '结清网联待清算'),
         line('ICBC', 'RESERVE_PBOC', 0, A, '准备金减少'),
-        line('NETSUNION', 'RESERVE_PBOC', A, 0, '收到付款行清算款'),
+        line('NETSUNION', 'RESERVE_PBOC', A, 0, '特参账户收到清算款'),
         line('NETSUNION', 'RECEIVABLE', 0, A, '结清对工行应收'),
-        line('NETSUNION', 'PAYABLE', A, 0, '结清对支付机构应付'),
-        line('NETSUNION', 'RESERVE_PBOC', 0, A, '向支付机构划付'),
-        line('PAYLAB', 'RESERVE_PBOC', A, 0, '备付金账户收款'),
-        line('PAYLAB', 'INTERBANK_RECEIVABLE', 0, A, '网联待清算'),
         line('PBOC', 'RESERVE_ICBC', A, 0, '工商银行准备金减少'),
-        line('PBOC', 'RESERVE_PAYLAB', 0, A, '支付机构备付金增加')
+        line('PBOC', 'RESERVE_NETSUNION', 0, A, '网联特参账户增加')
       ]
     }),
     makeLeg(3, {
+      key: 'netsunion-sp-payout',
+      title: '特参账户向支付机构划付',
+      detail: '网联从特参账户向支付机构备付金账户划付充值资金。',
+      system: '人民银行 ACS · 网联特参账户',
+      from: 'NETSUNION',
+      to: 'PAYLAB',
+      amount: A,
+      entries: [
+        line('NETSUNION', 'PAYABLE', A, 0, '结清对支付机构应付'),
+        line('NETSUNION', 'RESERVE_PBOC', 0, A, '特参账户向支付机构划付'),
+        line('PAYLAB', 'RESERVE_PBOC', A, 0, '备付金账户收款'),
+        line('PAYLAB', 'INTERBANK_RECEIVABLE', 0, A, '网联待清算'),
+        line('PBOC', 'RESERVE_NETSUNION', A, 0, '网联特参账户减少'),
+        line('PBOC', 'RESERVE_PAYLAB', 0, A, '支付机构备付金增加')
+      ]
+    }),
+    makeLeg(4, {
       key: 'wallet-posting',
       title: '支付机构确认钱包余额',
       detail: '支付机构资产（备付金）与负债（钱包余额）同时增加，充值不确认收入。',
@@ -731,27 +768,40 @@ function buildWithdrawFlow(options) {
       ]
     }),
     makeLeg(2, {
-      key: 'pboc-settlement',
-      title: '央行大额支付清算',
-      detail: '支付机构备付金减少，收款行准备金增加。',
-      system: '人民银行 CNAPS',
-      from: 'PBOC',
-      to: 'PAYLAB',
+      key: 'netsunion-sp-receive',
+      title: '网联特参账户收款',
+      detail: '支付机构备付金经人民银行 ACS 划入网联特许参与者账户。',
+      system: '人民银行 ACS · 网联特参账户',
+      from: 'PAYLAB',
+      to: 'NETSUNION',
       amount: A,
       entries: [
         line('PAYLAB', 'INTERBANK_PAYABLE', A, 0, '结清网联待清算'),
         line('PAYLAB', 'RESERVE_PBOC', 0, A, '备付金减少'),
-        line('NETSUNION', 'RESERVE_PBOC', A, 0, '收到支付机构清算款'),
+        line('NETSUNION', 'RESERVE_PBOC', A, 0, '特参账户收到清算款'),
         line('NETSUNION', 'RECEIVABLE', 0, A, '结清对支付机构应收'),
-        line('NETSUNION', 'PAYABLE', A, 0, '结清对工行应付'),
-        line('NETSUNION', 'RESERVE_PBOC', 0, A, '向收款行划付'),
-        line('ICBC', 'RESERVE_PBOC', A, 0, '收到提现清算款'),
-        line('ICBC', 'INTERBANK_RECEIVABLE', 0, A, '网联待清算'),
         line('PBOC', 'RESERVE_PAYLAB', A, 0, '支付机构备付金减少'),
-        line('PBOC', 'RESERVE_ICBC', 0, A, '工商银行准备金增加')
+        line('PBOC', 'RESERVE_NETSUNION', 0, A, '网联特参账户增加')
       ]
     }),
     makeLeg(3, {
+      key: 'netsunion-sp-payout',
+      title: '特参账户向收款行划付',
+      detail: '网联从特参账户向工商银行准备金账户划付提现资金。',
+      system: '人民银行 ACS · 网联特参账户',
+      from: 'NETSUNION',
+      to: 'ICBC',
+      amount: A,
+      entries: [
+        line('NETSUNION', 'PAYABLE', A, 0, '结清对工行应付'),
+        line('NETSUNION', 'RESERVE_PBOC', 0, A, '特参账户向收款行划付'),
+        line('ICBC', 'RESERVE_PBOC', A, 0, '收到提现清算款'),
+        line('ICBC', 'INTERBANK_RECEIVABLE', 0, A, '网联待清算'),
+        line('PBOC', 'RESERVE_NETSUNION', A, 0, '网联特参账户减少'),
+        line('PBOC', 'RESERVE_ICBC', 0, A, '工商银行准备金增加')
+      ]
+    }),
+    makeLeg(4, {
       key: 'bank-credit',
       title: '收款行入账',
       detail: '收款行把提现金额记入用户银行卡存款账户。',
@@ -1315,11 +1365,11 @@ function seedFlows(payments) {
   const examples = [
     {
       type: 'goods', amount: 12800, payer: 'U20001', payee: '云栖优选商城',
-      createdAt: day(-1, 10, 15), run: 5
+      createdAt: day(-1, 10, 15), run: 6
     },
     {
       type: 'utility', amount: 20000, payer: '张伟', payee: '市自来水公司',
-      createdAt: day(-1, 15, 20), run: 5
+      createdAt: day(-1, 15, 20), run: 6
     },
     {
       type: 'card', amount: 26800, payer: 'U10003', payee: '云栖数码',
@@ -1327,7 +1377,7 @@ function seedFlows(payments) {
     },
     {
       type: 'topup', amount: 50000, payer: '李娜', payee: '李娜钱包',
-      createdAt: minutesAgo(120), run: 4
+      createdAt: minutesAgo(120), run: 5
     },
     {
       type: 'withdraw', amount: 30000, payer: '李娜钱包', payee: '李娜',

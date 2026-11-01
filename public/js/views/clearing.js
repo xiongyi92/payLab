@@ -15,7 +15,7 @@ const CATEGORY = {
 
 const METRIC_CODES = {
   PAYLAB: [['RESERVE_PBOC', '备付金存款'], ['WALLET_LIABILITY', '钱包余额'], ['MERCHANT_PAYABLE', '商户待结算']],
-  NETSUNION: [['RESERVE_PBOC', '清算备付金'], ['RECEIVABLE', '清算应收'], ['PAYABLE', '清算应付']],
+  NETSUNION: [['RESERVE_PBOC', '特参账户存款'], ['RECEIVABLE', '清算应收'], ['PAYABLE', '清算应付']],
   UNIONPAY: [['RESERVE_PBOC', '清算备付金'], ['RECEIVABLE', '清算应收'], ['PAYABLE', '清算应付']],
   CIPS: [['RESERVE_PBOC', '清算备付金'], ['RECEIVABLE', '跨境应收'], ['PAYABLE', '跨境应付']],
   ICBC: [['DEPOSITS', '吸收存款'], ['LOANS', '贷款余额'], ['RESERVE_PBOC', '央行准备金']],
@@ -81,7 +81,7 @@ function architectureHTML() {
           ${mapNode(byCode.NETSUNION)}${mapNode(byCode.UNIONPAY)}${mapNode(byCode.CIPS)}
         </div>
       </div>
-      <div class="cm-connector"><span>网联 / 银联 / CIPS 转接 · 轧差净额</span></div>
+      <div class="cm-connector"><span>网联 / 银联 / CIPS 转接 · 轧差净额 · 网联特参账户清算</span></div>
       <div class="cm-tier">
         <div class="cm-tier-label">商业银行与支付机构</div>
         <div class="cm-nodes">
@@ -491,13 +491,14 @@ async function paint(root) {
       <div class="card-head">
         <div>
           <h2>跨机构清算架构</h2>
-          <p class="sub">商业银行 → 清算机构（网联 / 银联 / CIPS）→ 人民银行 CNAPS → 收款行 / 支付机构</p>
+          <p class="sub">商业银行 → 清算机构（网联特参账户 / 银联 / CIPS）→ 人民银行 CNAPS → 收款行 / 支付机构</p>
         </div>
         <span class="chip">${cache.institutions.length} 家参与机构</span>
       </div>
       ${architectureHTML()}
       <div class="arch-aux">
         <span class="chip">备付金 100% 集中存管</span>
+        <span class="chip">网联特参账户清算</span>
         <span class="chip">轧差净额清算</span>
         <span class="chip">准备金账户最终结算</span>
         <a class="chip" href="#/banking">银行会计 ›</a>
