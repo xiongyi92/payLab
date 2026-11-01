@@ -1,0 +1,17 @@
+# 运行时（便携 Node、端口信息）
+.runtime/
+
+# 本地演示数据（启动时自动生成）
+data/state.json
+data/*.corrupt-*
+
+# 依赖与日志
+node_modules/
+*.log
+npm-debug.log*
+
+# 编辑器与系统文件
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

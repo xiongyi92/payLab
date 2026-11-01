@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#070b13">
+  <title>PayLab · 支付全链路教学系统</title>
+  <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">P</div>
+        <div class="brand-text">
+          <div class="brand-name">PayLab</div>
+          <div class="brand-sub">支付全链路教学系统</div>
+        </div>
+      </div>
+      <nav class="nav" id="nav">
+        <a href="#/overview" data-route="overview">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+          <span>总览</span>
+        </a>
+        <a href="#/payment" data-route="payment">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 9.5h19"/><path d="M6 15h4"/></svg>
+          <span>全链路演练</span>
+        </a>
+        <a href="#/reliability" data-route="reliability">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6v5.5c0 4.6 3.1 7.9 7.5 9.5 4.4-1.6 7.5-4.9 7.5-9.5V6z"/><path d="m9 12 2 2 4-4"/></svg>
+          <span>可靠性实验室</span>
+        </a>
+        <a href="#/refund" data-route="refund">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10a8 8 0 0 1 13.8-5.3L20 7"/><path d="M20 3.5V7h-3.5"/><path d="M20 14a8 8 0 0 1-13.8 5.3L4 17"/><path d="M4 20.5V17h3.5"/></svg>
+          <span>退款与冲正</span>
+        </a>
+        <a href="#/reconcile" data-route="reconcile">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M5 7h14"/><path d="M5 7 2.5 13h5z"/><path d="M19 7l-2.5 6h5z"/><path d="M8 21h8"/></svg>
+          <span>对账中心</span>
+        </a>
+        <a href="#/settlement" data-route="settlement">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 4l9 5.5"/><path d="M5 10v8"/><path d="M9.5 10v8"/><path d="M14.5 10v8"/><path d="M19 10v8"/><path d="M3 21h18"/></svg>
+          <span>清结算</span>
+        </a>
+        <a href="#/clearing" data-route="clearing">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="2.5"/><circle cx="19" cy="6" r="2.5"/><circle cx="19" cy="18" r="2.5"/><path d="M7.5 11 16.5 6.8"/><path d="M7.5 13 16.5 17.2"/><path d="M19 8.5v7"/></svg>
+          <span>清算网络</span>
+        </a>
+        <a href="#/banking" data-route="banking">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 4l9 5.5"/><path d="M5 10v8"/><path d="M9.5 10v8"/><path d="M14.5 10v8"/><path d="M19 10v8"/><path d="M3 21h18"/><path d="M12 6.5v2"/></svg>
+          <span>银行会计</span>
+        </a>
+        <a href="#/risk" data-route="risk">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><path d="M12 3.5V7"/><path d="M12 17v3.5"/><path d="M3.5 12H7"/><path d="M17 12h3.5"/></svg>
+          <span>风控引擎</span>
+        </a>
+        <a href="#/logs" data-route="logs">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4" width="19" height="16" rx="2.5"/><path d="m6.5 9 3 3-3 3"/><path d="M12.5 15h5"/></svg>
+          <span>报文与日志</span>
+        </a>
+      </nav>
+      <div class="sidebar-foot">
+        <div class="env-pill"><span class="dot"></span>沙箱演示环境</div>
+        <button id="reset-btn" class="link-btn" type="button">重置演示数据</button>
+        <div class="build">零依赖 Node · 数据仅存本地</div>
+      </div>
+    </aside>
+    <div class="main">
+      <header class="topbar">
+        <div>
+          <h1 id="page-title">总览</h1>
+          <p id="page-sub" class="sub">今日交易、资金与风险一屏掌握</p>
+        </div>
+        <div class="topbar-actions">
+          <span class="chip">本地沙箱 · 不产生真实资金</span>
+          <a class="btn ghost sm" href="#/payment">进入演练台</a>
+        </div>
+      </header>
+      <main id="view" class="view">
+        <div class="loading"><span class="spinner"></span>加载中…</div>
+      </main>
+    </div>
+  </div>
+  <div id="toasts" class="toasts"></div>
+  <div id="modal-root"></div>
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>
