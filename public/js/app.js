@@ -1,5 +1,6 @@
 import { get, post } from './api.js';
 import { toast, confirmDialog } from './ui.js';
+import { initThemePicker } from './theme.js';
 import overview from './views/overview.js';
 import payment from './views/payment.js';
 import stage from './views/stage.js';
@@ -82,4 +83,5 @@ document.getElementById('reset-btn').addEventListener('click', async () => {
 });
 
 window.addEventListener('hashchange', route);
+initThemePicker();
 route();

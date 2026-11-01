@@ -88,15 +88,25 @@ server/
 
 public/
   index.html     单页外壳
-  css/app.css    全站样式（深色主题）
+  css/app.css    全站样式与颜色变量
+  css/theme.css  6 套颜色主题（data-theme 覆盖变量）
   js/app.js      哈希路由
+  js/theme.js    主题切换、持久化与无障碍下拉菜单
   js/api.js      fetch 封装
   js/ui.js       徽标、弹窗、格式化
   js/accounting.js 复式分录组件
   js/views/      11 个页面
 ```
 
-## 5. 开发约定
+## 5. 颜色主题
+
+- 所有颜色集中在 `public/css/app.css` 的 `:root` 变量中；组件样式只引用变量，不写死色值。
+- `public/css/theme.css` 用 `[data-theme="<id>"]` 覆盖同一组变量，已在 `ocean`（深海蓝，默认）、`violet`（星夜紫）、`forest`（翡翠绿）、`sunset`（落日橙）、`rose`（玫瑰粉）、`light`（晨雾白）中定义。
+- 主题由 `public/js/theme.js` 管理：选择后写入 `localStorage['paylab.theme']`，并同步 `<meta name="theme-color">`；`index.html` 里的内联脚本在首屏渲染前读取并设置 `data-theme`，避免刷新闪烁。
+- 新增主题：在 `theme.css` 增加 `[data-theme="<id>"]` 变量块，在 `theme.js` 的 `THEMES` 增加 `{ id, name, bg, swatch }`，同时把 id 加入 `index.html` 内联脚本的合法列表。
+- 浅色主题需要额外覆盖状态色（绿/黄/红徽标、借贷方向、弹窗遮罩）以保证对比度。
+
+## 6. 开发约定
 
 - 服务端 CommonJS，前端原生 ES Modules；
 - 不引入运行时依赖与构建工具；
@@ -107,7 +117,7 @@ public/
 - 账务写入必须幂等，使用 `ledgerExists` 或业务状态判断；
 - 前端展示统一使用 `esc()` 转义用户可控字符串。
 
-## 6. 常见扩展
+## 7. 常见扩展
 
 ### 新增支付渠道
 
@@ -150,7 +160,7 @@ public/
 2. 在 `app.js` 的 `routes` 与 `meta` 注册；
 3. 在 `index.html` 的侧边栏增加导航项（可选）。
 
-## 7. 调试方法
+## 8. 调试方法
 
 ### 查看 API
 
@@ -184,7 +194,7 @@ curl -X POST http://localhost:5178/api/reset
 
 也可以停止服务后删除 `data/state.json`，下次启动会重新播种。
 
-## 8. 排错
+## 9. 排错
 
 | 现象 | 原因 | 处理 |
 | --- | --- | --- |
@@ -200,7 +210,7 @@ curl -X POST http://localhost:5178/api/reset
 | 退款失败 | 模拟失败或渠道异常 | 在退款页点击重试 |
 | 结算没有可结算交易 | 结算日不匹配 | 按支付单的 `settleDate` 选择日期；跨境为 T+2 |
 
-## 9. 验证清单
+## 10. 验证清单
 
 修改后建议至少验证：
 
@@ -215,14 +225,14 @@ curl -X POST http://localhost:5178/api/reset
 9. 结算批次能生成并出款；
 10. 页面在窄屏下无横向溢出（开发时以约 826px 宽度验证）。
 
-## 10. 安全边界
+## 11. 安全边界
 
 - 项目没有登录与权限控制，所有接口对本机开放；
 - 默认监听所有网卡，若在不可信网络中使用，请通过防火墙限制访问，或修改 `server.js` 仅绑定 `127.0.0.1`；
 - 签名密钥是教学固定值，不能用于真实业务；
 - 不要将 `data/state.json`、`.runtime/` 或包含个人信息的演示数据提交到公开仓库。
 
-## 11. 发布到 Git
+## 12. 发布到 Git
 
 `.gitignore` 已排除运行时数据与便携运行时。常规流程：
 

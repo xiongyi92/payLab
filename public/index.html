@@ -3,9 +3,18 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#070b13">
+  <meta name="theme-color" content="#070b13" id="theme-color">
   <title>PayLab · 支付全链路教学系统</title>
+  <script>
+    try {
+      var savedTheme = localStorage.getItem('paylab.theme');
+      if (savedTheme && ['ocean', 'violet', 'forest', 'sunset', 'rose', 'light'].indexOf(savedTheme) >= 0) {
+        document.documentElement.setAttribute('data-theme', savedTheme);
+      }
+    } catch (error) {}
+  </script>
   <link rel="stylesheet" href="/css/app.css">
+  <link rel="stylesheet" href="/css/theme.css">
 </head>
 <body>
   <div class="app">
@@ -72,6 +81,14 @@
           <p id="page-sub" class="sub">今日交易、资金与风险一屏掌握</p>
         </div>
         <div class="topbar-actions">
+          <div class="theme-picker" id="theme-picker">
+            <button class="theme-trigger" id="theme-trigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-label="颜色主题">
+              <span class="theme-swatch" id="theme-swatch"></span>
+              <span class="theme-name" id="theme-name">深海蓝</span>
+              <svg class="theme-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+            <div class="theme-menu" id="theme-menu" role="listbox" aria-label="选择颜色主题"></div>
+          </div>
           <span class="chip">本地沙箱 · 不产生真实资金</span>
           <a class="btn ghost sm" href="#/payment">进入演练台</a>
         </div>
